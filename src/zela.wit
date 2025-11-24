@@ -1,0 +1,48 @@
+package rockawayx:zela@0.1.0;
+
+interface types {
+	type error = u32;
+	type json = list<u8>;
+
+	record rpc-error {
+		code: s32,
+		message: string,
+		data: option<json>
+	}
+}
+
+interface zela-host {
+	use types.{error, json, rpc-error};
+
+	/// Logs information from method to host log.
+	///
+	/// Useful for debugging.
+	log: func(message: string);
+
+	/// Calls an RPC method through the proxy.
+	///
+	/// Returns the resulting JSON or a WASI errno indicating a problem
+	/// outside of JSON-RPC.
+	///
+	/// TODO: Can be used to call other custom methods?
+	call-rpc: func(method: string, params: json) -> result<result<json, rpc-error>, error>;
+
+	/// Represents a RPC subscription (using WebSockets).
+	resource rpc-subscription {
+		/// Create a new subscription, returning a handle to it.
+		///
+		/// This subscription is cancelled on drop.
+		subscribe: static func(method: string, params: json) -> result<result<rpc-subscription, rpc-error>, error>;
+		/// Waits for the next message on the subscription.
+		recv: func() -> result<json, error>;
+	}
+}
+
+world zela-procedure {
+	import zela-host;
+
+	use types.{json, rpc-error};
+
+	/// Run the method, called once per incoming request.
+	export run: func(params: json) -> result<json, rpc-error>;
+}
