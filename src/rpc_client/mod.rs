@@ -6,7 +6,7 @@ mod config;
 mod error;
 mod filter;
 mod pubsub;
-mod request;
+pub mod request;
 pub mod response;
 mod util;
 
@@ -14,7 +14,7 @@ pub use client::*;
 pub use config::*;
 pub use error::{Error as ClientError, ErrorKind as ClientErrorKind, Result as ClientResult};
 pub use pubsub::{PubsubClient, PubsubClientError};
-pub use request::RpcRequest;
+pub use request::{RpcRequest, RpcError as ClientRpcError};
 use request::*;
 use response::*;
 use util::*;
