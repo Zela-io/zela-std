@@ -1573,10 +1573,11 @@ impl RpcClient {
 			Ok(Err(err)) => {
 				return Err(ClientError {
 					request: Some(request),
-					kind: ClientErrorKind::Custom(format!(
-						"RPC call return error {}: {}",
-						err.code, err.message
-					)),
+					kind: ClientErrorKind::RpcError(RpcError::RpcResponseError {
+						code: err.code.into(),
+						message: err.message,
+						data: RpcResponseErrorData::Empty,
+					}),
 				});
 			}
 			Err(err) => {
