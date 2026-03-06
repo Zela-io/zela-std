@@ -1568,28 +1568,25 @@ impl RpcClient {
 		assert!(params.is_object() || params.is_array() || params.is_null());
 
 		let method = format!("{request}");
-		let response = match crate::call_rpc::<Value, Value, Value>(&method, params) {
-			Ok(Ok(v)) => v,
+		match crate::call_rpc::<Value, T, Value>(&method, params) {
+			Ok(Ok(v)) => Ok(v),
 			Ok(Err(err)) => {
-				return Err(ClientError {
+				Err(ClientError {
 					request: Some(request),
 					kind: ClientErrorKind::RpcError(RpcError::RpcResponseError {
 						code: err.code.into(),
 						message: err.message,
 						data: RpcResponseErrorData::Empty,
 					}),
-				});
+				})
 			}
 			Err(err) => {
-				return Err(ClientError {
+				Err(ClientError {
 					request: Some(request),
 					kind: ClientErrorKind::Custom(format!("RPC call failed: {err}")),
-				});
+				})
 			}
-		};
-
-		serde_json::from_value(response)
-			.map_err(|err| ClientError::new_with_request(err.into(), request))
+		}
 	}
 }
 
